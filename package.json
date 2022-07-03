@@ -6,11 +6,16 @@
   "keywords": [],
   "author": "ghostrider-05",
   "license": "ISC",
-  "devDependencies": {
-    "discord.js": "^13.8.1",
-    "dotenv": "^16.0.1"
+  "scripts": {
+    "update": "tsc && node ./dist/update.js"
   },
-  "dependencies": {
-    "jszip": "^3.10.0"
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/node-fetch": "^2.6.2",
+    "chalk": "^4.1.2",
+    "dotenv": "^16.0.1",
+    "fflate": "^0.7.3",
+    "form-data": "^4.0.0",
+    "node-fetch": "^2.6.7"
   }
 }
