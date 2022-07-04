@@ -78,14 +78,14 @@ async function handleInteraction (data) {
                         description: `File size: ${name[1]}kB ${name[2] ? ' (zip)' : ''}\nVersion: ${metadata.version}`
                     }
                 ],
-                components: Interaction.formatComponents([
+                components: Interaction.formatComponents([[
                     {
                         type: 2,
                         label: 'Download package',
                         style: 5,
                         url: `https://dummy.ghostrider.workers.dev/api?name=${name[0]}`
                     }
-                ])
+                ]])
             })
             
             return Interaction.callback(data, 10, {

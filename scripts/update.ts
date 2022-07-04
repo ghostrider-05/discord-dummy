@@ -12,13 +12,10 @@ config()
 
 // Regenerate packages
 
-const maxSize = Number(process.env.MAX_PACKAGE_SIZE)
-const compressionLevel = Number(process.env.PACKAGE_COMPRESSION_LEVEL)
-
 const zip = new ZipManager({
-    maxSize,
+    maxSize: Number(process.env.MAX_PACKAGE_SIZE),
     levels: {
-        compression: <0>compressionLevel
+        compression: <0>Number(process.env.PACKAGE_COMPRESSION_LEVEL)
     }
 })
 
@@ -59,7 +56,11 @@ async function generatePackage (name: string[]) {
 
 function readGeneratedPackages () {
     return fs.readdirSync(path.resolve('.', './packages/'), { encoding: 'utf8' })
-        .flatMap(dir => !dir.endsWith('.json') ? fs.readdirSync(path.resolve('.', './packages/' + dir)).map(n => n.split('.')) : [])
+        .flatMap(dir => {
+            return !dir.endsWith('.json') 
+                ? fs.readdirSync(path.resolve('.', './packages/' + dir)).map(n => n.split('.')) 
+                : []
+        })
 }
 
 async function generate (packages: string[]) {
@@ -140,6 +141,13 @@ async function upload () {
         body: JSON.stringify(data)
     })
 
+    const description = [
+        `New version: **${process.env.RL_VERSION}**\n`,
+        'Access:',
+        `**API**: https://dummy.ghostrider.workers.dev/api?name=<upk_name>`,
+        `**Discord**: \`/mapmaking resources package name:<upk_name>\``
+    ].join('\n')
+
     if (process.env.COMPLETED_ACTION === 'upload') await fetch(process.env.COMPLETED_WEBHOOK_URL!, {
         method: 'POST',
         headers: {
@@ -149,7 +157,7 @@ async function upload () {
             {
                 title: `Updated remote dummy assets`,
                 color: 0x00FF00,
-                description: `New version: **${process.env.RL_VERSION}**\n\nAccess:\n**API**: https://dummy.ghostrider.workers.dev/api?name=<upk_name>\n**Discord**: \`/mapmaking resources package name:<upk_name>\``
+                description
             }
         ]})
     })
