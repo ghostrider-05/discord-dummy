@@ -6,8 +6,9 @@
   "keywords": [],
   "author": "ghostrider-05",
   "license": "ISC",
+  "type": "module",
   "scripts": {
-    "update": "tsc && node ./dist/update.js"
+    "update": "tsc && node ./dist/index.js"
   },
   "devDependencies": {
     "@types/node": "^18.0.0",

@@ -109,6 +109,10 @@ export class ZipManager {
     }
 
     public fileSize (name: string) {
-        return Math.round(fs.statSync(pkgPath(name, true)).size / 1000)
+        return Math.round(fs.statSync(pkgPath(name, true, true)).size / 1000)
+    }
+
+    public fileSizeRaw (name: string) {
+        return fs.statSync(pkgPath(name, true, true)).size.toString()
     }
 }

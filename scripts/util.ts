@@ -100,8 +100,14 @@ export class ProcessUtil {
 const pkgPath = (name: string, addName?: boolean, solveExtension?: boolean) => {
     const itemPath = path.resolve('.', `./packages/${name.toLowerCase().split('_')[0]}/${addName ? name : ''}`)
 
-    if (!solveExtension) return itemPath
+    if (!solveExtension || name.endsWith('.upk') || name.endsWith('.zip')) return itemPath
     else return (itemPath + (fsSync.existsSync(itemPath + '.upk') ? '.upk' : '.zip'))
+}
+
+const compare = (size1: string | undefined, size2: string | undefined) => {
+    if (!size1 && size2) return -1
+    else if (size1 && !size2) return 0
+    else return (Number(size2) - Number(size1)).toString()
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))

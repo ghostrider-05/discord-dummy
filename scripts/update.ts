@@ -19,10 +19,12 @@ const zip = new ZipManager({
     }
 })
 
-const packages = fs.readdirSync(process.env.PACKAGE_DIR!, { encoding: 'utf8' })
-    .filter(n => n.endsWith('.upk') && n.includes('_'))
+function readMainDir () {
+    return fs.readdirSync(process.env.PACKAGE_DIR!, { encoding: 'utf8' })
+        .filter(n => n.endsWith('.upk') && n.includes('_'))
+}
 
-let totalItems = packages.length, completedItems = 0;
+let totalItems = 0, completedItems = 0;
 
 async function generatePackage (name: string[]) {
     const folder = path.resolve('.', `./packages/`)
@@ -63,8 +65,11 @@ function readGeneratedPackages () {
         })
 }
 
-async function generate (packages: string[]) {
+export async function generate (packages: string[]) {
+    if (packages.length === 0) packages = readMainDir()
+    totalItems = packages.length
     log(`Generating ${totalItems} packages...`)
+
     if (!fs.existsSync(path.resolve('.', './packages/'))) fs.mkdirSync(path.resolve('.', './packages/'))
 
     const pkgChains = chunk(packages, Number(process.env.PACKAGES_PER_EXE)).map(group => {
@@ -82,10 +87,16 @@ async function generate (packages: string[]) {
         .map(([name, extension]) => [
             name, 
             zip.fileSize([name, extension].join('.')),
-            zip.itemSizes.isZipExtension(extension)
+            zip.itemSizes.isZipExtension(extension),
+            zip.fileSizeRaw([name, extension].join('.')),
         ])
 
     log(`\nCompleted generation of ${completedItems}/${totalItems} items`)
+
+    await new Promise<void>((resolve) => {
+        fs.writeFile(path.resolve('.', './packages/versiondata.json'), JSON.stringify({
+            packages: generatedPackages.map(([name]) => zip.fileSizeRaw(<string>name)),
+    }, null, 4), () => resolve())})
 
     return new Promise<void>((resolve) => {
         fs.writeFile(path.resolve('.', './packages/metadata.json'), JSON.stringify({
@@ -96,9 +107,11 @@ async function generate (packages: string[]) {
     })
 }
 
-async function upload () {
+export async function upload () {
     //@ts-ignore
-    const { default: data } = await import('../packages/metadata.json')
+    const { default: data } = await import('../packages/metadata.json', {
+        assert: { type: 'json' }
+    })
     const packages = (data as unknown as { packages: [string, string, boolean][] }).packages
     const failed: string[] = []
 
@@ -162,5 +175,3 @@ async function upload () {
         ]})
     })
 }
-
-generate(packages).then(async () => await upload())
